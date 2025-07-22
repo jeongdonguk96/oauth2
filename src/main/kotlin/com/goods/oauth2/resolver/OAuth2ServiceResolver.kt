@@ -8,6 +8,7 @@ class OAuth2ServiceResolver(
     private val services: Map<String, OAuth2Service>
 ) {
     private val providerToBeanName: Map<String, String> = mapOf(
+        "apple" to "appleService",
         "kakao" to "kakaoService",
         "google" to "googleService"
     )

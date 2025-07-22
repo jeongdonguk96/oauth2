@@ -80,7 +80,7 @@ class KakaoServiceTest {
         )
 
         // when
-        val userInfo = kakaoService.getUserInfoByCode("test-authorization-code")
+        val userInfo = kakaoService.getUserInfoByAuthorizationCode("test-authorization-code")
 
         // then
         assertThat(userInfo.id).isEqualTo("123456789")

@@ -20,12 +20,16 @@ class KakaoService(
     @Value("\${oauth2.kakao.user-info-uri}") private val userInfoUri: String
 ) : OAuth2Service {
 
-    override suspend fun getUserInfoByCode(code: String): OAuthUserInfo {
+    override suspend fun getUserInfoByAuthorizationCode(
+        code: String
+    ): OAuthUserInfo {
         val token = getAccessToken(code)
         return getUserInfo(token.access_token)
     }
 
-    private suspend fun getAccessToken(code: String): OAuthTokenResponse {
+    private suspend fun getAccessToken(
+        code: String
+    ): OAuthTokenResponse {
         return webClient.post()
             .uri(tokenUri)
             .contentType(MediaType.APPLICATION_JSON)
@@ -42,7 +46,9 @@ class KakaoService(
             .awaitBody<KakaoTokenResponse>()
     }
 
-    private suspend fun getUserInfo(accessToken: String): OAuthUserInfo {
+    private suspend fun getUserInfo(
+        accessToken: String
+    ): OAuthUserInfo {
         return webClient.get()
             .uri(userInfoUri)
             .header("Authorization", "Bearer $accessToken")
