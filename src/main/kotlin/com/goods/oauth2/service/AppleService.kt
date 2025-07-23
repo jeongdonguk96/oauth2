@@ -2,21 +2,18 @@ package com.goods.oauth2.service
 
 import com.goods.oauth2.dto.CommonOAuthUserInfo
 import com.goods.oauth2.dto.OAuthUserInfo
+import com.goods.oauth2.extention.logger
 import com.goods.oauth2.jwt.JwtTokenProvider
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.Jwts.SIG
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.KeyFactory
 import java.security.PrivateKey
 import java.security.spec.PKCS8EncodedKeySpec
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.Base64
-import java.util.Date
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 
@@ -34,21 +31,33 @@ class AppleService(
     @Value("\${oauth2.apple.user-info-uri}") private val userInfoUri: String
 ) : OAuth2Service {
 
+    private val log = logger
+
     override suspend fun getUserInfoByAuthorizationCode(
         code: String
     ): OAuthUserInfo {
         val p8File = readP8File(privateKeyPath)
+        log.info("p8File: $p8File")
+
         val privateKey = loadPrivateKeyFromP8(p8File)
+        log.info("privateKey: $privateKey")
+
         val clientSecret = jwtTokenProvider.generateAppleClientSecret(keyId, teamId, clientId, audienceUri, privateKey)
+        log.info("clientSecret: $clientSecret")
+
         return getUserInfo(code, clientSecret)
     }
 
-    private fun readP8File(filePath: String): String {
+    private fun readP8File(
+        filePath: String
+    ): String {
         val path = Paths.get(filePath)
         return Files.readString(path)
     }
 
-    private fun loadPrivateKeyFromP8(p8Content: String): PrivateKey {
+    private fun loadPrivateKeyFromP8(
+        p8Content: String
+    ): PrivateKey {
         val privateKeyPEM = p8Content
             .replace("-----BEGIN PRIVATE KEY-----", "")
             .replace("-----END PRIVATE KEY-----", "")
@@ -66,14 +75,12 @@ class AppleService(
         return webClient.post()
             .uri(userInfoUri)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .bodyValue(
-                mapOf(
-                    "grant_type" to "authorization_code",
-                    "client_id" to clientId,
-                    "client_secret" to clientSecret,
-                    "code" to code,
-                    "redirect_uri" to redirectUri
-                )
+            .body(
+                BodyInserters.fromFormData("grant_type", "authorization_code")
+                    .with("client_id", clientId)
+                    .with("client_secret", clientSecret)
+                    .with("code", code)
+                    .with("redirect_uri", redirectUri)
             )
             .retrieve()
             .awaitBody<CommonOAuthUserInfo>()

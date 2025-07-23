@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component
 
 @Component
 class JwtTokenProvider(
-    @Value("\${jwt.secret}") private val secretKey: String,
-    @Value("\${jwt.access-expiry}") private val accessExpiry: Long,
-    @Value("\${jwt.refresh-expiry}") private val refreshExpiry: Long
+    @Value("\${oauth2.jwt.secret}") private val secretKey: String,
+    @Value("\${oauth2.jwt.access-expiry}") private val accessExpiry: Long,
+    @Value("\${oauth2.jwt.refresh-expiry}") private val refreshExpiry: Long
 ) {
     private val secretKeyBytes = Base64.getEncoder().encode(secretKey.toByteArray())
     private val key = Keys.hmacShaKeyFor(secretKeyBytes)
@@ -68,7 +68,6 @@ class JwtTokenProvider(
             .expiration(expireAt)
             .signWith(privateKey, SIG.ES256)
             .compact()
-
     }
 
     fun getSubject(token: String): String {
