@@ -22,12 +22,12 @@ class OAuth2Controller(
     @PostMapping("/{provider}/callback")
     suspend fun handleOAuth2Callback(
         @PathVariable(value = "provider") provider: String,
-        @RequestBody oAuth2Request: OAuth2Request
+        @RequestParam("code") code: String
     ): ResponseEntity<String> {
         log.info("==================== API START ====================")
-        log.info("provider: $provider, code: ${oAuth2Request.code}")
+        log.info("provider: $provider, code: ${code}")
 
-        val userInfo = authService.handleOAuth2Login(provider, oAuth2Request.code)
+        val userInfo = authService.handleOAuth2Login(provider, code)
         log.info("==================== API END ====================")
         return ResponseEntity.ok(userInfo)
     }

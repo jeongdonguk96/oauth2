@@ -1,21 +1,31 @@
 package com.goods.oauth2.service
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.goods.oauth2.dto.AppleJwkKeys
+import com.goods.oauth2.dto.AppleTokenResponse
 import com.goods.oauth2.dto.CommonOAuthUserInfo
 import com.goods.oauth2.dto.OAuthUserInfo
 import com.goods.oauth2.extention.logger
 import com.goods.oauth2.jwt.JwtTokenProvider
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.security.KeyFactory
-import java.security.PrivateKey
-import java.security.spec.PKCS8EncodedKeySpec
-import java.util.Base64
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jwts
+import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBody
+import java.math.BigInteger
+import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.security.KeyFactory
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.RSAPublicKeySpec
+import java.util.*
 
 
 @Service
@@ -45,7 +55,8 @@ class AppleService(
         val clientSecret = jwtTokenProvider.generateAppleClientSecret(keyId, teamId, clientId, audienceUri, privateKey)
         log.info("clientSecret: $clientSecret")
 
-        return getUserInfo(code, clientSecret)
+        val userResponse = getUserInfo(code, clientSecret)
+        return mapUserInfo(userResponse)
     }
 
     private fun readP8File(
@@ -71,8 +82,8 @@ class AppleService(
     private suspend fun getUserInfo(
         code: String,
         clientSecret: String
-    ): OAuthUserInfo {
-        return webClient.post()
+    ): AppleTokenResponse {
+        val rawResponse = webClient.post()
             .uri(userInfoUri)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .body(
@@ -83,7 +94,83 @@ class AppleService(
                     .with("redirect_uri", redirectUri)
             )
             .retrieve()
-            .awaitBody<CommonOAuthUserInfo>()
+            .onStatus({ it.is4xxClientError }) { response ->
+                response.bodyToMono(String::class.java).map { body ->
+                    log.error("❌ Apple API 4xx Error Body: {}", body)
+                    throw IllegalArgumentException("Apple API 호출 실패: $body")
+                }
+            }
+            .bodyToMono(String::class.java)
+            .awaitSingle()
+
+        log.info("✅ Apple API 성공 응답: {}", rawResponse)
+
+        val mapper = jacksonObjectMapper()
+        return mapper.readValue(rawResponse, AppleTokenResponse::class.java)
+    }
+
+    fun mapUserInfo(
+        userResponse: AppleTokenResponse
+    ) : OAuthUserInfo {
+        val claims = parseAndValidateAppleIdToken(userResponse.id_token)
+
+        val id = claims.subject // Apple에서 발급한 고유 사용자 ID
+        val email = claims["email"] as? String ?: "no-email@apple.com"
+        val nickname = null // Apple은 nickname 제공 안 함
+        val profileImage = null // Apple은 프로필 이미지 제공 안 함
+
+        return CommonOAuthUserInfo(
+            id = id,
+            email = email,
+            nickname = nickname,
+            profile_image = profileImage
+        )
+    }
+
+    fun fetchApplePublicKey(kid: String): PublicKey {
+        val jwkUrl = URL("https://appleid.apple.com/auth/keys")
+        val mapper = jacksonObjectMapper()
+        val keySet = jwkUrl.openStream().use {
+            mapper.readValue<AppleJwkKeys>(it)
+        }
+
+        val matchingKey = keySet.keys.find { it.kid == kid }
+            ?: throw IllegalArgumentException("No matching Apple public key found for kid: $kid")
+
+        val modulus = Base64.getUrlDecoder().decode(matchingKey.n)
+        val exponent = Base64.getUrlDecoder().decode(matchingKey.e)
+
+        val spec = RSAPublicKeySpec(BigInteger(1, modulus), BigInteger(1, exponent))
+        return KeyFactory.getInstance("RSA").generatePublic(spec)
+    }
+
+    fun parseAndValidateAppleIdToken(idToken: String): Claims {
+        // 1. JWT 헤더에서 kid 추출
+        val jwtParts = idToken.split(".")
+        if (jwtParts.size != 3) throw IllegalArgumentException("Invalid JWT structure")
+
+        val headerJson = String(Base64.getUrlDecoder().decode(jwtParts[0]), Charsets.UTF_8)
+        val kid = jacksonObjectMapper().readTree(headerJson).get("kid")?.asText()
+            ?: throw IllegalArgumentException("No 'kid' in token header")
+
+        // 2. Apple 공개키 가져오기
+        val publicKey = fetchApplePublicKey(kid)
+
+        // 3. JWT 파서 빌드 및 검증
+        val parser = Jwts.parser()
+            .setSigningKey(publicKey)
+            .build()
+
+        val jws = parser.parseSignedClaims(idToken)  // ✅ 여기 주의: "parseSignedClaims" 사용
+        val claims = jws.payload
+
+        // 4. 필수 필드 검증
+        if (claims.issuer != "https://appleid.apple.com")
+            throw IllegalArgumentException("Invalid token issuer")
+        if (claims.expiration.before(Date()))
+            throw IllegalArgumentException("Token expired")
+
+        return claims
     }
 
 }

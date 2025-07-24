@@ -10,6 +10,7 @@ import java.security.PrivateKey
 import java.util.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.time.Instant
 
 
 @Component
@@ -57,7 +58,7 @@ class JwtTokenProvider(
         privateKey: PrivateKey
     ): String {
         val now = Date()
-        val expireAt = Date(now.time + 15777000 * 1000)
+        val expireAt = Date.from(Instant.now().plusSeconds(15777000))
 
         return Jwts.builder()
             .setHeaderParam("kid", keyId)

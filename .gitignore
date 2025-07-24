@@ -192,4 +192,7 @@ gradle-app.setting
 # env file
 *.env
 
+# .p8 file
+*.p8
+
 # End of https://www.toptal.com/developers/gitignore/api/kotlin,intellij,windows,gradle
