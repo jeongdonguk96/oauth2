@@ -27,6 +27,7 @@ class KakaoService(
         return getUserInfo(token.access_token)
     }
 
+
     private suspend fun getAccessToken(
         code: String
     ): OAuthTokenResponse {
@@ -45,6 +46,7 @@ class KakaoService(
             .retrieve()
             .awaitBody<KakaoTokenResponse>()
     }
+
 
     private suspend fun getUserInfo(
         accessToken: String

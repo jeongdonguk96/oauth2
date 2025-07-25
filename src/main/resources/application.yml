@@ -44,12 +44,13 @@ oauth2:
     client-id: ${APPLE_CLIENT_ID}
     private-key-path: ${APPLE_PRIVATE_KEY_PATH}
     redirect-uri: ${APPLE_REDIRECT_URI}
+    jwks-uri: https://appleid.apple.com/auth/keys
     audience-uri: https://appleid.apple.com
     user-info-uri: https://appleid.apple.com/auth/token
   jwt:
     secret: U2VjdXJlS2V5Rm9yU3ByaW5nQm9vdEFwcExldEV4YW1wbGU=
-    access-expiry: 60000
-    refresh-expiry: 60000
+    access-token-expiry: 60000
+    refresh-token-expiry: 60000
 
 ---
 spring:
@@ -92,9 +93,10 @@ oauth2:
     client-id: ${APPLE_CLIENT_ID}
     private-key-path: ${APPLE_PRIVATE_KEY_PATH}
     redirect-uri: ${APPLE_REDIRECT_URI}
+    jwks-uri: https://appleid.apple.com/auth/keys
     audience-uri: https://appleid.apple.com
     user-info-uri: https://appleid.apple.com/auth/token
   jwt:
     secret: U2VjdXJlS2V5Rm9yU3ByaW5nQm9vdEFwcExldEV4YW1wbGU=
-    access-expiry: 60000
-    refresh-expiry: 60000
+    access-token-expiry: 60000
+    refresh-token-expiry: 60000

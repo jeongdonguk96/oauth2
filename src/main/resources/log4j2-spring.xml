@@ -5,9 +5,9 @@
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
 
-        <File name="FileLogger" fileName="logs/goods/api/service.log" append="true">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-        </File>
+<!--        <File name="FileLogger" fileName="logs/goods/api/service.log" append="true">-->
+<!--            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>-->
+<!--        </File>-->
     </Appenders>
 
     <Loggers>

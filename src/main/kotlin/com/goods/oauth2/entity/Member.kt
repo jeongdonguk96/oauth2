@@ -7,11 +7,11 @@ import jakarta.persistence.Id
 
 @Entity
 class Member(
-    val email: String
-) {
+    val email: String,
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = 0L
-
+) {
     override fun toString(): String {
         return "Member(id=$id, email=$email)"
     }

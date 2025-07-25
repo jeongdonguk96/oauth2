@@ -9,4 +9,6 @@ data class AppleJwkKey(
     val e: String
 )
 
-data class AppleJwkKeys(val keys: List<AppleJwkKey>)
+data class AppleJwkKeys(
+    val keys: List<AppleJwkKey>
+)

@@ -1,6 +1,6 @@
 package com.goods.oauth2.filter
 
-import com.goods.oauth2.jwt.JwtTokenProvider
+import com.goods.oauth2.jwt.JwtTokenService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -12,7 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class JwtAuthenticationFilter(
-    private val jwtTokenProvider: JwtTokenProvider
+    private val jwtTokenService: JwtTokenService
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
@@ -25,16 +25,17 @@ class JwtAuthenticationFilter(
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             val token = authHeader.substring(7)
 
-            if (jwtTokenProvider.validateToken(token)) {
-                val username = jwtTokenProvider.getSubject(token)
-                val roles = jwtTokenProvider.getRoles(token)
+            if (jwtTokenService.validateToken(token)) {
+                val email = jwtTokenService.getSubject(token)
+                val roles = jwtTokenService.getRoles(token)
                 val authorities = roles.map { SimpleGrantedAuthority(it) }
 
-                val auth = UsernamePasswordAuthenticationToken(username, null, authorities)
+                val auth = UsernamePasswordAuthenticationToken(email, null, authorities)
                 SecurityContextHolder.getContext().authentication = auth
             }
         }
 
         filterChain.doFilter(request, response)
     }
+
 }

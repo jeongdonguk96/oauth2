@@ -14,9 +14,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter
 ) {
+    private val permitEndpoints = arrayOf(
+        "/h2-console/**",
+        "/api/auth/**"
+    )
 
     @Bean
-    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+    fun filterChain(
+        http: HttpSecurity
+    ): SecurityFilterChain {
         http
             .csrf { it.disable() }
             .headers { headers ->
@@ -25,8 +31,7 @@ class SecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/h2-console/**").permitAll()
-                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers(*permitEndpoints).permitAll()
                     .anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
