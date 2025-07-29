@@ -95,7 +95,7 @@ class JwtTokenService(
 
 
     fun validateToken(
-    token: String
+        token: String
     ) : Boolean {
         try {
             Jwts.parser()
@@ -106,10 +106,13 @@ class JwtTokenService(
             return true
         } catch (e: Exception) {
             if (e is SignatureException) {
+                // TODO: 토큰 검증 실패 예외를 던진다.
                 throw RuntimeException("JWT Token Invalid Exception")
             } else if (e is ExpiredJwtException) {
+                // TODO: DB의 리프레시 토큰을 조회해 재검증해 true를 리턴하거나 다시 예외를 던진다.
                 throw RuntimeException("JWT Token Expired Exception")
             } else {
+                // TODO: 토큰 기타 예외를 던진다.
                 throw RuntimeException("JWT Exception")
             }
         }

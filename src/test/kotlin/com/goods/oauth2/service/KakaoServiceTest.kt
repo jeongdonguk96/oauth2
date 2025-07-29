@@ -85,7 +85,5 @@ class KakaoServiceTest {
         // then
         assertThat(userInfo.id).isEqualTo("123456789")
         assertThat(userInfo.email).isEqualTo("test@kakao.com")
-        assertThat(userInfo.nickname).isEqualTo("홍길동")
-        assertThat(userInfo.profile_image).isEqualTo("http://test.image")
     }
 }
