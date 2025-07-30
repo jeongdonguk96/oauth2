@@ -49,8 +49,8 @@ oauth2:
     user-info-uri: https://appleid.apple.com/auth/token
   jwt:
     secret: U2VjdXJlS2V5Rm9yU3ByaW5nQm9vdEFwcExldEV4YW1wbGU=
-    access-token-expiry: 60000L
-    refresh-token-expiry: 60000L
+    access-token-expiry: 60000
+    refresh-token-expiry: 60000
 
 ---
 spring:
@@ -98,5 +98,5 @@ oauth2:
     user-info-uri: https://appleid.apple.com/auth/token
   jwt:
     secret: U2VjdXJlS2V5Rm9yU3ByaW5nQm9vdEFwcExldEV4YW1wbGU=
-    access-token-expiry: 60000L
-    refresh-token-expiry: 60000L
+    access-token-expiry: 60000
+    refresh-token-expiry: 60000
