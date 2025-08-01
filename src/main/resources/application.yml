@@ -36,6 +36,7 @@ oauth2:
     key-id: ${APPLE_KEY_ID}
     team-id: ${APPLE_TEAM_ID}
     client-id: ${APPLE_CLIENT_ID}
+    secret-expiry: ${APPLE_SECRET_EXPIRY}
     private-key-path: ${APPLE_PRIVATE_KEY_PATH}
     redirect-uri: ${APPLE_REDIRECT_URI}
     jwks-uri: https://appleid.apple.com/auth/keys
@@ -90,6 +91,7 @@ oauth2:
     key-id: ${APPLE_KEY_ID}
     team-id: ${APPLE_TEAM_ID}
     client-id: ${APPLE_CLIENT_ID}
+    secret-expiry: ${APPLE_SECRET_EXPIRY}
     private-key-path: ${APPLE_PRIVATE_KEY_PATH}
     redirect-uri: ${APPLE_REDIRECT_URI}
     jwks-uri: https://appleid.apple.com/auth/keys
@@ -145,6 +147,7 @@ oauth2:
     team-id: 11
     client-id: 11
     private-key-path: 11
+    secret-expiry: 11
     redirect-uri: 11
     jwks-uri: https://appleid.apple.com/auth/keys
     audience-uri: https://appleid.apple.com

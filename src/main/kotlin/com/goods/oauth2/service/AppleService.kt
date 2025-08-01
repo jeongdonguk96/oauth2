@@ -12,6 +12,7 @@ import com.goods.oauth2.jwt.JwtTokenService
 import com.goods.oauth2.util.FileUtil
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwts.SIG
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -25,6 +26,8 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.RSAPublicKeySpec
+import java.time.Duration
+import java.time.Instant
 import java.util.*
 
 
@@ -35,6 +38,7 @@ class AppleService(
     @Value("\${oauth2.apple.key-id}") private val keyId: String,
     @Value("\${oauth2.apple.team-id}") private val teamId: String,
     @Value("\${oauth2.apple.client-id}") private val clientId: String,
+    @Value("\${oauth2.apple.secret-expiry}") private val secretExpiry: Duration,
     @Value("\${oauth2.apple.private-key-path}") private val privateKeyPath: String,
     @Value("\${oauth2.apple.redirect-uri}") private val redirectUri: String,
     @Value("\${oauth2.apple.jwks-uri}") private val jwksUri: String,
@@ -54,7 +58,7 @@ class AppleService(
         val privateKey = loadPrivateKeyFromP8File(p8File)
         log.info("privateKey: $privateKey")
 
-        val clientSecret = jwtTokenService.generateAppleClientSecret(keyId, teamId, clientId, audienceUri, privateKey)
+        val clientSecret = generateAppleClientSecret(privateKey)
         log.info("clientSecret: $clientSecret")
 
         val userResponse = getUserInfo(code, clientSecret)
@@ -74,6 +78,27 @@ class AppleService(
         val kf = KeyFactory.getInstance("EC")
 
         return kf.generatePrivate(keySpec)
+    }
+
+
+    private fun generateAppleClientSecret(
+        privateKey: PrivateKey
+    ): String {
+        val now = Instant.now()
+        return Jwts.builder()
+            .header()
+                .add("kid", keyId)
+                .and()
+            .claims()
+                .add("aud",audienceUri)
+                .issuer(teamId)
+                .subject(clientId)
+                .issuedAt(Date())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusSeconds(secretExpiry.seconds)))
+                .and()
+            .signWith(privateKey, SIG.ES256)
+            .compact()
     }
 
 

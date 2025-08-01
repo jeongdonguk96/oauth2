@@ -28,7 +28,6 @@ class KakaoServiceTest {
 
         kakaoService = KakaoService(
             webClient = webClient,
-            clientId = "test-client-id",
             clientSecret = "test-client-secret",
             redirectUri = "http://localhost/api/auth/kakao/callback",
             tokenUri = "/oauth/token",

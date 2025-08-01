@@ -24,11 +24,15 @@ class SecurityConfig(
         http: HttpSecurity
     ): SecurityFilterChain {
         http
-            .csrf { it.disable() }
-            .headers { headers ->
-                headers.frameOptions { it.disable() }  // iframe 허용
+            .csrf {
+                it.disable()
             }
-            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .headers { headers ->
+                headers.frameOptions { it.disable() }
+            }
+            .sessionManagement {
+                it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            }
             .authorizeHttpRequests {
                 it
                     .requestMatchers(*permitEndpoints).permitAll()
