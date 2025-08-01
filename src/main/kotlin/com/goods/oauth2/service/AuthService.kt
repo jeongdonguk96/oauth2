@@ -1,5 +1,6 @@
 package com.goods.oauth2.service
 
+import com.goods.oauth2.enums.Provider
 import com.goods.oauth2.extention.logger
 import com.goods.oauth2.jwt.JwtTokenService
 import com.goods.oauth2.resolver.OAuth2ServiceResolver
@@ -14,7 +15,7 @@ class AuthService(
     private val log = logger
 
     suspend fun handleOAuth2Login(
-        provider: String,
+        provider: Provider,
         code: String
     ): String {
         val oAuth2Service = oAuth2ServiceResolver.resolve(provider)

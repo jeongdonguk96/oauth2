@@ -13,7 +13,6 @@ import org.springframework.web.reactive.function.client.awaitBody
 @Service
 class KakaoService(
     private val webClient: WebClient,
-    @Value("\${oauth2.kakao.client-id}") private val clientId: String,
     @Value("\${oauth2.kakao.client-secret}") private val clientSecret: String,
     @Value("\${oauth2.kakao.redirect-uri}") private val redirectUri: String,
     @Value("\${oauth2.kakao.token-uri}") private val tokenUri: String,
@@ -37,7 +36,6 @@ class KakaoService(
             .bodyValue(
                 mapOf(
                     "grant_type" to "authorization_code",
-                    "client_id" to clientId,
                     "client_secret" to clientSecret,
                     "code" to code,
                     "redirect_uri" to redirectUri

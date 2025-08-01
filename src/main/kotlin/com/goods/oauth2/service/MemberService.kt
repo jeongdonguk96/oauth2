@@ -16,7 +16,8 @@ class MemberService(
         return memberRepository.findByEmail(userInfo.email)
             ?: memberRepository.save(
                 Member(
-                    userInfo.email
+                    userInfo.email,
+                    userInfo.provider,
                 )
             )
     }

@@ -6,6 +6,7 @@ import com.goods.oauth2.dto.AppleJwkKeys
 import com.goods.oauth2.dto.AppleTokenResponse
 import com.goods.oauth2.dto.CommonOAuthUserInfo
 import com.goods.oauth2.dto.OAuthUserInfo
+import com.goods.oauth2.enums.Provider
 import com.goods.oauth2.extention.logger
 import com.goods.oauth2.jwt.JwtTokenService
 import com.goods.oauth2.util.FileUtil
@@ -111,6 +112,7 @@ class AppleService(
         return CommonOAuthUserInfo(
             id = sub,
             email = email,
+            provider = Provider.APPLE
         )
     }
 

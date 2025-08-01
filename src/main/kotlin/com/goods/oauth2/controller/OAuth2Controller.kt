@@ -1,6 +1,7 @@
 package com.goods.oauth2.controller
 
 import com.goods.oauth2.dto.AppleTokenRequest
+import com.goods.oauth2.enums.Provider
 import com.goods.oauth2.extention.logger
 import com.goods.oauth2.service.AuthService
 import org.springframework.http.ResponseEntity
@@ -20,7 +21,7 @@ class OAuth2Controller(
 
     @PostMapping("/{provider}/callback")
     suspend fun handleOAuth2Callback(
-        @PathVariable(value = "provider") provider: String,
+        @PathVariable(value = "provider") provider: Provider,
         @RequestBody request: AppleTokenRequest
     ): ResponseEntity<String> {
         log.info("==================== API START ====================")
